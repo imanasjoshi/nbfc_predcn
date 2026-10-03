@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+artifacts/runtime/
+catboost_info/
+*.py[cod]
+venv/
+.env
+.env.*
+.streamlit/secrets.toml
+.DS_Store
+artifacts/streamlit.log
+artifacts/first_app_test.log
+*.log
+artifacts/app_review/*_download.csv
+artifacts/app_review/*_download.json

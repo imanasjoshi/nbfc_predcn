@@ -1,0 +1,75 @@
+C:\Users\joshi\OneDrive\Desktop\NBFC_Loan\.venv\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+Cell 1/71: # NBFC Loan Default Prediction & Credit Risk Modeling
+Cell 2/71: ## 1. Setup and methods
+Cell 3/71: from pathlib import Path
+Cell 4/71: ### Validation design and key assumptions
+Cell 5/71: ## 2. Load and understand the source data
+Cell 6/71: input_paths = {'train': find_input('Train.csv'), 'test': find_input('Test.csv'),
+Cell 7/71: ## 3. Reusable data-quality audit
+Cell 8/71: def quality_summary(df):
+Cell 9/71: ## 4. Availability and leakage review
+Cell 10/71: post_loan = ['interest_receive', 'last_week_pay']
+Cell 11/71: ## 5. Shared feature engineering
+Cell 12/71: """Portable, deterministic origination transformations shared by notebook and app."""
+Cell 13/71: X = create_features(train_df)
+Cell 14/71: ## 6. Lock the data partitions
+Cell 15/71: development_index, validation_index = train_test_split(train_df.index, test_size=.20,
+Cell 16/71: ## 7. ID artifact diagnostic
+Cell 17/71: id_diagnostic = RandomForestClassifier(n_estimators=80, max_depth=4,
+Cell 18/71: ## 8. Focused exploratory analysis
+Cell 19/71: def grouped_rates(groups):
+Cell 20/71: ### Loan Amnt
+Cell 21/71: distribution_chart('loan_amnt', clip=False)
+Cell 22/71: ### Interest Rate
+Cell 23/71: distribution_chart('interest_rate', clip=False)
+Cell 24/71: ### Annual Income
+Cell 25/71: distribution_chart('annual_income', clip=True)
+Cell 26/71: ### Debt To Income
+Cell 27/71: distribution_chart('debt_to_income', clip=True)
+Cell 28/71: ### Loan grade and subgrade
+Cell 29/71: rate_chart('loan_grade');
+Cell 30/71: ### Loan duration
+Cell 31/71: rate_chart('loan_term');
+Cell 32/71: ### Borrowing purpose and housing
+Cell 33/71: rate_chart('loan_purpose');
+Cell 34/71: ### Job experience
+Cell 35/71: rate_chart('job_experience');
+Cell 36/71: ### Delinquency and public records
+Cell 37/71: for column in ['delinq_2yrs', 'public_records']:
+Cell 38/71: ### Revolving exposure and available limits
+Cell 39/71: distribution_chart('revolving_balance', clip=True)
+Cell 40/71: ## 9. Fit baseline and advanced models
+Cell 41/71: def make_preprocessor(scale=True):
+Cell 42/71: catboost_trials = []
+Cell 43/71: ## 10. Probability reliability and calibration choice
+Cell 44/71: calibration_base_fit = selected_model.predict_proba(X.loc[cal_fit_index])[:, 1]
+Cell 45/71: ## 11. Freeze the operating threshold and risk bands
+Cell 46/71: tune_probabilities = calibrated_probability(selected_model, X_tune, selected_calibrator, calibration
+Cell 47/71: ## 12. One-time untouched holdout evaluation
+Cell 48/71: validation_results = {name: evaluate_model(name, y_valid, model.predict_proba(X_valid)[:, 1])
+Cell 49/71: ### Confusion matrices and business meaning
+Cell 50/71: def draw_confusion(result, title, filename):
+Cell 51/71: ### Credit-risk discrimination and probability reliability
+Cell 52/71: def calculate_ks(actual, probabilities):
+Cell 53/71: ## 13. Holdout risk-band separation
+Cell 54/71: validation_predictions['risk_band'] = pd.Categorical(
+Cell 55/71: ## 14. SHAP explainability
+Cell 56/71: explanation_role = 'selected underlying model' if selected_name == 'CatBoost' else 'CatBoost challen
+Cell 57/71: catboost_holdout_probability = catboost_model.predict_proba(X_valid)[:, 1]
+Cell 58/71: ## 15. Optional existing-loan comparison
+Cell 59/71: RUN_MONITORING_COMPARISON = True
+Cell 60/71: ## 16. Final selection assessment and refit
+Cell 61/71: holdout_ranked = model_comparison.iloc[:len(models)].sort_values(['ROC-AUC','PR-AUC'], ascending=Fal
+Cell 62/71: ## 17. Generate supplied test predictions
+Cell 63/71: test_probabilities = calibrated_probability(final_model, test_features[FEATURE_COLUMNS],
+Cell 64/71: ## 18. Save model, transformations and deployment configuration
+Cell 65/71: bundle = {'model': final_model, 'calibrator': final_calibrator, 'calibration_method': calibration_me
+Cell 66/71: """Deployment helper: same transformations and saved probability mapping."""
+Cell 67/71: deployment_source = next(c.source for c in notebook_source.cells
+Cell 68/71: ## 19. Reload and deployment input checks
+Cell 69/71: loaded_bundle = joblib.load(MODELS / 'origination_model_bundle.pkl')
+Cell 70/71: ## 20. Results and next phase
+Cell 71/71: summary = f"""### Dataset
+SUCCESS: executed notebook and HTML preview saved.
